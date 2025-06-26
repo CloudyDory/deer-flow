@@ -5,9 +5,9 @@ import json
 import logging
 import os
 
-from langchain_community.tools import BraveSearch, DuckDuckGoSearchResults
+from langchain_community.tools import BraveSearch, DuckDuckGoSearchResults, GoogleSerperResults
 from langchain_community.tools.arxiv import ArxivQueryRun
-from langchain_community.utilities import ArxivAPIWrapper, BraveSearchWrapper
+from langchain_community.utilities import ArxivAPIWrapper, BraveSearchWrapper, GoogleSerperAPIWrapper
 
 from src.config import SearchEngine, SELECTED_SEARCH_ENGINE
 from src.tools.tavily_search.tavily_search_results_with_images import (
@@ -23,7 +23,7 @@ LoggedTavilySearch = create_logged_tool(TavilySearchResultsWithImages)
 LoggedDuckDuckGoSearch = create_logged_tool(DuckDuckGoSearchResults)
 LoggedBraveSearch = create_logged_tool(BraveSearch)
 LoggedArxivSearch = create_logged_tool(ArxivQueryRun)
-
+LoggedGoogleSerperSearch = create_logged_tool(GoogleSerperResults)
 
 # Get the selected search tool
 def get_web_search_tool(max_search_results: int):
@@ -52,6 +52,15 @@ def get_web_search_tool(max_search_results: int):
         return LoggedArxivSearch(
             name="web_search",
             api_wrapper=ArxivAPIWrapper(
+                top_k_results=max_search_results,
+                load_max_docs=max_search_results,
+                load_all_available_meta=True,
+            ),
+        )
+    elif SELECTED_SEARCH_ENGINE == SearchEngine.SERPER.value:
+        return LoggedGoogleSerperSearch(
+            name="web_search",
+            api_wrapper=GoogleSerperAPIWrapper(
                 top_k_results=max_search_results,
                 load_max_docs=max_search_results,
                 load_all_available_meta=True,
